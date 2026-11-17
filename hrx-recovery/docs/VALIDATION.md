@@ -15,7 +15,7 @@
 | ClamAV1.4.3 | 真实引擎，**专用TEST签名库**验证正常/EICAR样本，不代表生产病毒库 |
 | 数据库备份恢复 | pg_dump/pg_restore到独立库，迁移历史、RLS和列级授权核对通过；不包含私有文件联合恢复 |
 
-源日志见 docs/evidence/validation.log；截图为隔离TEST夹具，时区Asia/Shanghai。所有权限夹具在测试中由独立DBA连接创建，迁移不插入真实用户、业务数据或授权。
+源日志见 docs/evidence/validation.txt；截图为隔离TEST夹具，时区Asia/Shanghai。所有权限夹具在测试中由独立DBA连接创建，迁移不插入真实用户、业务数据或授权。
 
 已验证：签名、issuer/audience、过期/格式错误Token、无本地身份403、无登录401；项目越权与伪造actor；采购/收货/IQC分离；单一来源例外；超量拒绝；并发幂等和旧版本冲突；原始单价JSON列禁止读取；文件版本只追加、并发一胜一冲突、撤权立即拒绝、跨对象引用拒绝、内容篡改拒绝、病毒测试文件隔离；MVC错误回滚标记及提交前不发送成功body。
 
