@@ -1,0 +1,44 @@
+package com.hrx.recovery;
+import java.util.*;import java.time.Instant;import java.net.*;import java.net.http.*;import java.util.concurrent.*;
+import org.junit.jupiter.api.*;import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.beans.factory.annotation.Autowired;import org.springframework.boot.test.context.SpringBootTest;import org.springframework.boot.test.web.server.LocalServerPort;import org.springframework.jdbc.core.JdbcTemplate;import org.springframework.test.context.*;
+import static org.junit.jupiter.api.Assertions.*;import static com.hrx.recovery.TestSupport.*;
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
+@EnabledIfEnvironmentVariable(named="HRX_TEST_DB_URL",matches="jdbc:postgresql:.*hrx_test_.*")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class RecoveryIntegrationTest {
+ @LocalServerPort int port;@Autowired JdbcTemplate runtime;
+ @DynamicPropertySource static void database(DynamicPropertyRegistry r){properties(r);}
+ @BeforeAll void prepare(){fixtures();}
+ String create() throws Exception{var r=request(port,1,"/supply-chain/demands",demand(),keyId());assertEquals(200,r.statusCode(),r.body());return JSON.readTree(r.body()).get("demand_id").asText();}
+ String event(int who,String id,int revision,String code,Map<String,Object> payload,int expected) throws Exception{var r=request(port,who,"/supply-chain/demands/"+id+"/events",TestSupport.event(revision,code,payload),keyId());assertEquals(expected,r.statusCode(),r.body());return r.body();}
+ String ordered() throws Exception{String id=create();event(1,id,0,"SUBMIT",Map.of(),200);event(1,id,1,"OPEN_RFQ",Map.of(),200);String q=JSON.readTree(event(1,id,2,"QUOTE",Map.of("supplier","TEST supplier A","currency","CNY","unitPrice",12),200)).get("event_id").asText();event(1,id,3,"QUOTE",Map.of("supplier","TEST supplier B","currency","CNY","unitPrice",13),200);event(2,id,4,"APPROVE",Map.of("quoteId",q),200);event(1,id,5,"ISSUE_PO",Map.of("poNumber","TEST-PO"),200);return id;}
+ @Test void oidcDiscoverySignaturesAudienceExpiryAndEmployeeMapping() throws Exception{
+  assertEquals(401,request(port,0,"/me/profile",null,null).statusCode());
+  for(String t:List.of("invalid",token(1,"other-api",Instant.now().plusSeconds(300),ISS),token(1,"hrx-api",Instant.now().minusSeconds(300),ISS),token(1,"hrx-api",Instant.now().plusSeconds(300),"https://wrong.invalid"))){var r=HTTP.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/api/v1/me/profile")).timeout(java.time.Duration.ofSeconds(10)).header("Authorization","Bearer "+t).build(),HttpResponse.BodyHandlers.ofString());assertEquals(401,r.statusCode());assertTrue(r.headers().firstValue("Set-Cookie").isEmpty());}
+  assertEquals(403,request(port,99,"/me/profile",null,null).statusCode());assertEquals(200,request(port,1,"/me/profile",null,null).statusCode());
+ }
+ @Test void createIdempotencyConflictScopeAndForgedActor() throws Exception{
+  var body=new HashMap<>(demand());body.put("requestedBy",user(5).toString());String key=keyId();var a=request(port,1,"/supply-chain/demands",body,key);assertEquals(200,a.statusCode(),a.body());assertEquals(JSON.readTree(a.body()),JSON.readTree(request(port,1,"/supply-chain/demands",body,key).body()));String id=JSON.readTree(a.body()).get("demand_id").asText();assertEquals(user(1),admin().queryForObject("SELECT requested_by FROM hrx.supply_demand WHERE demand_id=?::uuid",UUID.class,id));body.put("quantity",11);assertEquals(409,request(port,1,"/supply-chain/demands",body,key).statusCode());
+  assertEquals(404,request(port,5,"/supply-chain/demands/"+id,null,null).statusCode());assertEquals(403,request(port,5,"/supply-chain/demands",demand(),keyId()).statusCode());var other=new HashMap<>(demand());other.put("projectId",OTHER.toString());assertEquals(403,request(port,1,"/supply-chain/demands",other,keyId()).statusCode());assertEquals(0,JSON.readTree(request(port,5,"/supply-chain/demands",null,null).body()).get("total").asInt());
+ }
+ @Test void fullProcurementRequiresIndependentInspection() throws Exception{
+  String id=ordered(),today=java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString();event(1,id,6,"PROMISE",Map.of("promisedDate",today),200);String receipt=JSON.readTree(event(3,id,7,"RECEIVE",Map.of("quantity",10,"batch","TEST-BATCH","receivedDate",today),200)).get("event_id").asText();var check=Map.<String,Object>of("receiptId",receipt,"acceptedQty",10,"rejectedQty",0);event(3,id,8,"IQC",check,403);event(1,id,8,"IQC",check,403);event(4,id,8,"IQC",check,200);assertEquals("CLOSED",JSON.readTree(request(port,1,"/supply-chain/demands/"+id,null,null).body()).get("current_status").asText());event(1,id,9,"CANCEL",Map.of(),422);
+ }
+ @Test void selfApprovalSingleSourceAndOverReceipt() throws Exception{
+  String id=create();event(1,id,0,"SUBMIT",Map.of(),200);event(1,id,0,"OPEN_RFQ",Map.of(),409);event(1,id,1,"OPEN_RFQ",Map.of(),200);String quote=JSON.readTree(event(1,id,2,"QUOTE",Map.of("supplier","TEST sole source","currency","CNY","unitPrice",1),200)).get("event_id").asText();var reason=Map.<String,Object>of("quoteId",quote,"singleSourceReason","TEST technical sole-source justification");event(1,id,3,"APPROVE",reason,403);event(2,id,3,"APPROVE",Map.of("quoteId",quote),422);event(2,id,3,"APPROVE",reason,200);event(1,id,4,"ISSUE_PO",Map.of("poNumber","TEST-PO"),200);event(3,id,5,"RECEIVE",Map.of("quantity",11,"batch","TEST","receivedDate",java.time.LocalDate.now().toString()),422);
+ }
+ @Test void simultaneousRetriesAndRevisionHaveOneBusinessEffect() throws Exception{
+  var pool=Executors.newFixedThreadPool(2);try{var body=demand();String key=keyId();var start=new CountDownLatch(1);Callable<HttpResponse<String>> task=()->{start.await();return request(port,1,"/supply-chain/demands",body,key);};var a=pool.submit(task);var b=pool.submit(task);start.countDown();var first=a.get(15,TimeUnit.SECONDS);var second=b.get(15,TimeUnit.SECONDS);assertEquals(200,first.statusCode(),first.body());assertEquals(200,second.statusCode(),second.body());assertEquals(JSON.readTree(first.body()),JSON.readTree(second.body()));String id=JSON.readTree(first.body()).get("demand_id").asText();Callable<Integer> eventTask=()->request(port,1,"/supply-chain/demands/"+id+"/events",TestSupport.event(0,"SUBMIT",Map.of()),keyId()).statusCode();var x=pool.submit(eventTask);var y=pool.submit(eventTask);assertEquals(Set.of(200,409),new HashSet<>(List.of(x.get(),y.get())));assertEquals(1,admin().queryForObject("SELECT count(*) FROM hrx.supply_event WHERE demand_id=?::uuid",Integer.class,id));}finally{pool.shutdownNow();}
+ }
+ @Test void readonlyProjectionCannotRevealPriceOrRawJson() throws Exception{
+  String id=ordered();var rows=JSON.readTree(request(port,6,"/supply-chain/demands/"+id+"/events",null,null).body());for(var r:rows)assertFalse(JSON.readTree(r.get("payload").asText()).has("unitPrice"));assertThrows(org.springframework.dao.DataAccessException.class,()->runtime.queryForList("SELECT payload FROM hrx.supply_event"));
+ }
+ @Test void validationAndFailedWritesLeaveNoBusinessEffects() throws Exception{
+  var body=new HashMap<>(demand());body.put("quantity",0);assertEquals(400,request(port,1,"/supply-chain/demands",body,keyId()).statusCode());assertEquals(400,request(port,1,"/supply-chain/demands",demand(),null).statusCode());assertEquals(400,request(port,1,"/supply-chain/demands/not-a-uuid",null,null).statusCode());String id=create();event(5,id,0,"SUBMIT",Map.of(),404);assertEquals(0,admin().queryForObject("SELECT count(*) FROM hrx.supply_event WHERE demand_id=?::uuid",Integer.class,id));
+ }
+ @Test void runtimeRoleContextAndEvidenceBoundaries(){
+  assertFalse(runtime.queryForObject("SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname=current_user",Boolean.class));assertFalse(runtime.queryForObject("SELECT pg_has_role(current_user,'hrx_recovery_owner','MEMBER')",Boolean.class));assertNull(runtime.queryForObject("SELECT hrx.current_user_id()",UUID.class));assertFalse(runtime.queryForObject("SELECT has_table_privilege(current_user,'hrx.supply_demand','UPDATE')",Boolean.class));assertThrows(org.springframework.dao.DataAccessException.class,()->runtime.queryForList("SELECT * FROM hrx.audit_event"));assertTrue(runtime.queryForObject("SELECT hrx.valid_evidence_refs(?::jsonb)",Boolean.class,"[\"hrx-file:"+"a".repeat(501)+"\"]"));assertFalse(runtime.queryForObject("SELECT hrx.valid_evidence_refs(?::jsonb)",Boolean.class,"[\"hrx-file:"+"a".repeat(502)+"\"]"));assertFalse(runtime.queryForObject("SELECT hrx.valid_evidence_refs('[null]'::jsonb)",Boolean.class));
+ }
+ @Test @EnabledIfEnvironmentVariable(named="HRX_BROWSER",matches="true") void browserProcurement() throws Exception{Map<String,String> tokens=new HashMap<>();for(int n=1;n<=5;n++)tokens.put("user"+n,token(n));BrowserRunner.run(port,"procurement.mjs",tokens,Map.of());}
+}

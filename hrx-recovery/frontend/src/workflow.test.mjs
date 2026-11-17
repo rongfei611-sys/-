@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {actions,retryKey} from './workflow.js';
+const caps={supply_chain:{read:true,update:true,approve:true,receive:true,inspect:true,read_price:true}},d={current_status:'SOURCING',requested_by:'requester',buyer_user_id:'buyer',sourcing_round:1,received_qty:0};
+test('申请人/采购人不能自批，即使同时有审批能力',()=>{for(const who of ['buyer','requester'])assert.deepEqual(actions(d,who,caps),['QUOTE','CANCEL']);});
+test('缺省拒绝和独立价格授权',()=>{assert.deepEqual(actions(d,'reviewer',{}),[]);assert.deepEqual(actions(d,'reviewer',{supply_chain:{approve:true}}),[]);assert.deepEqual(actions(d,'reviewer',caps),['APPROVE','REJECT']);});
+test('本轮报价作者不能批准',()=>{assert.deepEqual(actions(d,'reviewer',caps,[{event_code:'QUOTE',actor_user_id:'reviewer',sourcing_round:1}]),[]);});
+test('收货与检验分离，已检验批次不可复检',()=>{const demand={...d,current_status:'RECEIVED'},receipt={event_id:'r1',event_code:'RECEIVE',actor_user_id:'receiver'};assert.deepEqual(actions(demand,'receiver',caps,[receipt]),[]);assert.deepEqual(actions(demand,'inspector',caps,[receipt]),['IQC']);assert.deepEqual(actions(demand,'inspector',caps,[receipt,{event_code:'IQC',payload:'{"receiptId":"r1"}'}]),[]);});
+test('终态无动作，批准后取消需独立授权',()=>{assert.deepEqual(actions({...d,current_status:'CLOSED'},'buyer',caps),[]);assert.deepEqual(actions({...d,current_status:'ORDERED'},'buyer',caps),['PROMISE']);assert.ok(actions({...d,current_status:'ORDERED'},'reviewer',caps).includes('CANCEL'));});
+test('请求不变重试键不变，修改请求更换键',()=>{const ref={current:null};const first=retryKey(ref,{a:1});assert.equal(first,retryKey(ref,{a:1}));assert.notEqual(first,retryKey(ref,{a:2}));});

@@ -1,0 +1,1 @@
+import {defineConfig} from 'vite';import react from '@vitejs/plugin-react';export default defineConfig({plugins:[react()],server:{proxy:process.env.HRX_API_TARGET?{'/api':{target:process.env.HRX_API_TARGET,changeOrigin:true}}:undefined}});

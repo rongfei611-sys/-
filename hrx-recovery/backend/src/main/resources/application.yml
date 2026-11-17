@@ -1,0 +1,32 @@
+server:
+  address: ${HRX_BIND:127.0.0.1}
+  port: ${HRX_PORT:8080}
+spring:
+  datasource:
+    url: ${HRX_DB_URL:jdbc:postgresql://127.0.0.1:5432/hrx_recovery}
+    username: ${HRX_DB_USER:hrx_recovery_app}
+    password: ${HRX_DB_PASSWORD:}
+  flyway:
+    enabled: ${HRX_MIGRATE:false}
+    user: ${HRX_MIGRATOR_USER:hrx_recovery_migrator}
+    password: ${HRX_MIGRATOR_PASSWORD:}
+    init-sqls: SET ROLE hrx_recovery_owner
+    schemas: hrx
+    default-schema: hrx
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${HRX_OIDC_ISSUER_URI}
+          audiences: ${HRX_OIDC_AUDIENCE:hrx-api}
+hrx:
+  files:
+    enabled: ${HRX_FILES_ENABLED:false}
+    directory: ${HRX_FILES_DIRECTORY:}
+    scanner: ${HRX_FILES_SCANNER:}
+    signatures: ${HRX_FILES_SIGNATURES:}
+    revision: ${HRX_FILES_SCAN_REVISION:}

@@ -1,0 +1,11 @@
+export async function request(path,options={}){
+ if(typeof path!=='string'||!path.startsWith('/api/v1/')||path.includes('..'))throw new Error('只允许本站业务接口');
+ if(typeof globalThis.HRX_AUTH?.getAccessToken!=='function')throw new Error('尚未配置可信 OIDC 登录适配器');
+ const token=await globalThis.HRX_AUTH.getAccessToken();if(typeof token!=='string'||!token.trim())throw new Error('登录已失效');
+ const {binary,...rest}=options,headers=new Headers(options.headers||{}),method=options.method||'GET';headers.set('Authorization',`Bearer ${token}`);
+ if(!['GET','HEAD'].includes(method)&&!headers.has('Idempotency-Key'))throw new Error('写入需要幂等键');if(options.body&&!(options.body instanceof FormData))headers.set('Content-Type','application/json');
+ const r=await fetch(path,{...rest,method,headers,credentials:'omit',redirect:'error',cache:'no-store'});if(r.ok&&binary)return r.blob();
+ let data;try{data=await r.json();}catch{throw new Error('响应格式无效');}if(!r.ok){const e=new Error(data.message||`请求失败（${r.status}）`);e.status=r.status;e.correlationId=data.correlationId;throw e;}return data;
+}
+const b='/api/v1/supply-chain',write=(path,body,key)=>request(path,{method:'POST',body:JSON.stringify(body),headers:{'Idempotency-Key':key}});
+export const api={me:()=>request('/api/v1/me/profile'),caps:()=>request('/api/v1/me/capabilities'),projects:()=>request(`${b}/projects`),buyers:id=>request(`${b}/projects/${encodeURIComponent(id)}/participants`),list:(page=0,q='')=>request(`${b}/demands?${new URLSearchParams({page,size:20,q})}`),get:id=>request(`${b}/demands/${encodeURIComponent(id)}`),events:id=>request(`${b}/demands/${encodeURIComponent(id)}/events`),delivery:()=>request(`${b}/supplier-delivery`),create:(body,key)=>write(`${b}/demands`,body,key),append:(id,body,key)=>write(`${b}/demands/${encodeURIComponent(id)}/events`,body,key),fileStatus:()=>request('/api/v1/files/status'),files:id=>request(`/api/v1/files?demandId=${encodeURIComponent(id)}`),upload:(id,doc,version,file,key)=>{const body=new FormData();body.set('demandId',id);if(doc)body.set('documentId',doc);body.set('expectedVersion',String(version));body.set('file',file);return request('/api/v1/files',{method:'POST',body,headers:{'Idempotency-Key':key}});},download:id=>request(`/api/v1/files/${encodeURIComponent(id)}/content`,{binary:true})};
