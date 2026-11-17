@@ -1,0 +1,68 @@
+package com.hrx.recovery;
+import java.util.*;import java.util.concurrent.*;import java.math.BigDecimal;
+import org.junit.jupiter.api.*;import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;import org.springframework.beans.factory.annotation.Autowired;import org.springframework.boot.test.context.SpringBootTest;import org.springframework.boot.test.web.server.LocalServerPort;import org.springframework.jdbc.core.JdbcTemplate;import org.springframework.test.context.*;
+import static org.junit.jupiter.api.Assertions.*;import static com.hrx.recovery.TestSupport.*;
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
+@EnabledIfEnvironmentVariable(named="HRX_TEST_DB_URL",matches="jdbc:postgresql:.*hrx_test_.*")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class PurchaseOrderIntegrationTest {
+ @LocalServerPort int port;@Autowired JdbcTemplate runtime;
+ @DynamicPropertySource static void database(DynamicPropertyRegistry r){properties(r);}
+ @BeforeAll void prepare(){fixtures();for(int n=1;n<=4;n++)for(String a:List.of("read","create","approve","issue","cancel"))grant(admin(),n,"purchase_order",a);grant(admin(),6,"purchase_order","read");}
+ String supplyEvent(int who,String id,int revision,String code,Map<String,Object> payload,int expected) throws Exception{var r=request(port,who,"/supply-chain/demands/"+id+"/events",event(revision,code,payload),keyId());assertEquals(expected,r.statusCode(),r.body());return r.body();}
+ String approved(String supplier,String currency,int requester,String quantity,String price) throws Exception{
+  return approvedAt(PROJECT,supplier,currency,requester,quantity,price);
+ }
+ String approvedAt(UUID project,String supplier,String currency,int requester,String quantity,String price) throws Exception{
+  var d=new HashMap<>(demand());d.put("projectId",project.toString());d.put("quantity",quantity);var r=request(port,requester,"/supply-chain/demands",d,keyId());assertEquals(200,r.statusCode(),r.body());String id=JSON.readTree(r.body()).get("demand_id").asText();supplyEvent(1,id,0,"SUBMIT",Map.of(),200);supplyEvent(1,id,1,"OPEN_RFQ",Map.of(),200);String quote=JSON.readTree(supplyEvent(1,id,2,"QUOTE",Map.of("supplier",supplier,"currency",currency,"unitPrice",price),200)).get("event_id").asText();supplyEvent(1,id,3,"QUOTE",Map.of("supplier","TEST other supplier","currency",currency,"unitPrice",price),200);supplyEvent(requester==2?3:2,id,4,"APPROVE",Map.of("quoteId",quote),200);return id;
+ }
+ Map<String,Object> orderBody(String number,String... ids){return Map.of("orderNo",number,"note","TEST multi-line order","lines",Arrays.stream(ids).map(id->Map.of("demandId",id,"expectedRevision",5)).toList());}
+ String create(int who,Map<String,Object> body,String key,int expected) throws Exception{var r=request(port,who,"/purchase-orders",body,key);assertEquals(expected,r.statusCode(),r.body());return r.body();}
+ String poEvent(int who,String id,int rev,String code,int expected) throws Exception{var body=Map.of("expectedRevision",rev,"eventCode",code,"note","TEST order "+code,"evidenceRefs",List.of("hrx-file:test/order"));var r=request(port,who,"/purchase-orders/"+id+"/events",body,keyId());assertEquals(expected,r.statusCode(),r.body());return r.body();}
+ @Test void multiLineOrderReplaysApprovesAndIssuesAtomically() throws Exception{
+  String a=approved("TEST grouping supplier","CNY",1,"10","12"),b=approved("TEST grouping supplier","CNY",1,"5","3.25"),number="TEST-PO-"+keyId(),key=keyId();var body=orderBody(number,a,b);String created=create(1,body,key,200),id=JSON.readTree(created).get("order_id").asText();assertEquals(JSON.readTree(created),JSON.readTree(create(1,body,key,200)));var changed=new HashMap<>(body);changed.put("note","TEST changed");create(1,changed,key,409);
+  var order=JSON.readTree(request(port,1,"/purchase-orders/"+id,null,null).body());assertEquals(2,order.get("line_count").asInt());assertEquals(0,new BigDecimal("136.25").compareTo(new BigDecimal(order.get("total_amount").asText())));
+  assertEquals(404,request(port,5,"/purchase-orders/"+id,null,null).statusCode());assertEquals(0,JSON.readTree(request(port,5,"/purchase-orders",null,null).body()).get("total").asInt());
+  supplyEvent(1,a,5,"ISSUE_PO",Map.of("poNumber","TEST bypass"),409);supplyEvent(2,a,5,"CANCEL",Map.of(),409);create(1,orderBody("TEST duplicate "+keyId(),a),keyId(),409);
+  poEvent(1,id,0,"APPROVED",403);poEvent(2,id,0,"ISSUED",422);poEvent(2,id,0,"APPROVED",200);poEvent(2,id,1,"ISSUED",403);poEvent(1,id,1,"ISSUED",200);poEvent(1,id,1,"ISSUED",409);
+  for(String d:List.of(a,b)){var row=JSON.readTree(request(port,1,"/supply-chain/demands/"+d,null,null).body());assertEquals("ORDERED",row.get("current_status").asText());assertEquals(6,row.get("revision").asInt());assertEquals(number,row.get("po_number").asText());assertEquals(1,admin().queryForObject("SELECT count(*) FROM hrx.audit_event WHERE resource_id=?::uuid AND action_code='ISSUE_PO'",Integer.class,d));}
+ }
+ @Test void mixedSupplierCurrencyProjectDuplicateAndStaleInputsFailWithoutPartialReservation() throws Exception{
+  String a=approved("TEST supplier X","CNY",1,"1","1"),b=approved("TEST supplier Y","CNY",1,"1","1"),c=approved("TEST supplier X","USD",1,"1","1");
+  create(1,orderBody("TEST MIX "+keyId(),a,b),keyId(),422);create(1,orderBody("TEST FX "+keyId(),a,c),keyId(),422);create(1,orderBody("TEST DUP "+keyId(),a,a),keyId(),422);
+  var stale=new HashMap<>(orderBody("TEST STALE "+keyId(),a));stale.put("lines",List.of(Map.of("demandId",a,"expectedRevision",4)));create(1,stale,keyId(),409);create(2,orderBody("TEST NOTBUYER "+keyId(),a),keyId(),403);create(5,orderBody("TEST NOACCESS "+keyId(),a),keyId(),403);
+  assertEquals(0,admin().queryForObject("SELECT count(*) FROM hrx.purchase_order_line WHERE demand_id IN (?::uuid,?::uuid,?::uuid)",Integer.class,a,b,c));
+  String missing=UUID.randomUUID().toString();create(1,orderBody("TEST MISSING "+keyId(),a,missing),keyId(),403);assertEquals(0,admin().queryForObject("SELECT count(*) FROM hrx.purchase_order_line WHERE demand_id=?::uuid",Integer.class,a));
+ }
+ @Test void rejectionAndCancellationReleaseReservationsButKeepHistory() throws Exception{
+  String a=approved("TEST reusable grouping","CNY",1,"1","1"),b=approved("TEST reusable grouping","CNY",1,"2","2");String first=JSON.readTree(create(1,orderBody("TEST REJECT "+keyId(),a,b),keyId(),200)).get("order_id").asText();poEvent(2,first,0,"REJECTED",200);poEvent(2,first,1,"APPROVED",422);
+  assertEquals(2,admin().queryForObject("SELECT count(*) FROM hrx.purchase_order_line WHERE order_id=?::uuid AND NOT reservation_active",Integer.class,first));String second=JSON.readTree(create(1,orderBody("TEST CANCEL "+keyId(),a,b),keyId(),200)).get("order_id").asText();poEvent(2,second,0,"APPROVED",200);poEvent(1,second,1,"CANCELLED",403);poEvent(2,second,1,"CANCELLED",200);supplyEvent(1,a,5,"ISSUE_PO",Map.of("poNumber","TEST independent standalone"),200);
+ }
+ @Test void allLinesMustBeIndependentFromApproverAndPricesAreSeparatelyProtected() throws Exception{
+  String a=approved("TEST independence","CNY",1,"0.2","0.1"),b=approved("TEST independence","CNY",2,"0.2","0.1");String id=JSON.readTree(create(1,orderBody("TEST DECIMAL "+keyId(),a,b),keyId(),200)).get("order_id").asText();poEvent(2,id,0,"APPROVED",403);poEvent(3,id,0,"APPROVED",200);
+  var priced=JSON.readTree(request(port,1,"/purchase-orders/"+id,null,null).body());assertEquals(0,new BigDecimal("0.04").compareTo(new BigDecimal(priced.get("total_amount").asText())));assertTrue(priced.get("total_amount").isTextual());var hidden=JSON.readTree(request(port,6,"/purchase-orders/"+id,null,null).body());assertTrue(hidden.get("total_amount").isNull());for(var row:JSON.readTree(request(port,6,"/purchase-orders/"+id+"/lines",null,null).body())){assertTrue(row.get("unit_price").isNull());assertTrue(row.get("line_amount").isNull());}
+  assertThrows(org.springframework.dao.DataAccessException.class,()->runtime.queryForList("SELECT unit_price FROM hrx.purchase_order_line"));assertThrows(org.springframework.dao.DataAccessException.class,()->runtime.update("UPDATE hrx.purchase_order SET current_status='ISSUED'"));
+ }
+ @Test void concurrentGroupingAndIssuingHaveOneWinner() throws Exception{
+  String a=approved("TEST concurrent PO","CNY",1,"1","1"),b=approved("TEST concurrent PO","CNY",1,"1","1");var pool=Executors.newFixedThreadPool(2);
+  try{Callable<java.net.http.HttpResponse<String>> task=()->request(port,1,"/purchase-orders",orderBody("TEST CONCURRENT "+keyId(),a,b),keyId());var x=pool.submit(task);var y=pool.submit(task);var r=x.get(15,TimeUnit.SECONDS);var s=y.get(15,TimeUnit.SECONDS);assertEquals(Set.of(200,409),new HashSet<>(List.of(r.statusCode(),s.statusCode())));String id=JSON.readTree(r.statusCode()==200?r.body():s.body()).get("order_id").asText();poEvent(2,id,0,"APPROVED",200);
+   var event=Map.of("expectedRevision",1,"eventCode","ISSUED","note","TEST concurrent issue","evidenceRefs",List.of("hrx-file:test/order"));Callable<Integer> issue=()->request(port,1,"/purchase-orders/"+id+"/events",event,keyId()).statusCode();var p=pool.submit(issue);var q=pool.submit(issue);assertEquals(Set.of(200,409),new HashSet<>(List.of(p.get(15,TimeUnit.SECONDS),q.get(15,TimeUnit.SECONDS))));assertEquals(2,admin().queryForObject("SELECT count(*) FROM hrx.supply_event WHERE demand_id IN (?::uuid,?::uuid) AND event_code='ISSUE_PO'",Integer.class,a,b));
+  }finally{pool.shutdownNow();}
+ }
+ @Test void anIssueFailureRollsBackEveryLineHeaderEventAndAudit() throws Exception{
+  String a=approved("TEST rollback PO","CNY",1,"1","1"),b=approved("TEST rollback PO","CNY",1,"1","1");String id=JSON.readTree(create(1,orderBody("TEST ROLLBACK "+keyId(),a,b),keyId(),200)).get("order_id").asText();poEvent(2,id,0,"APPROVED",200);
+  String last=List.of(a,b).stream().sorted().toList().getLast();var j=admin();j.execute("CREATE FUNCTION hrx.test_po_failure() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.event_code='ISSUE_PO' AND NEW.demand_id='"+last+"'::uuid THEN RAISE EXCEPTION 'TEST forced second line failure' USING ERRCODE='23514';END IF;RETURN NEW;END $$");j.execute("CREATE TRIGGER z_test_po_failure BEFORE INSERT ON hrx.supply_event FOR EACH ROW EXECUTE FUNCTION hrx.test_po_failure()");
+  try{poEvent(1,id,1,"ISSUED",422);assertEquals("APPROVED",j.queryForObject("SELECT current_status FROM hrx.purchase_order WHERE order_id=?::uuid",String.class,id));assertEquals(1,j.queryForObject("SELECT revision FROM hrx.purchase_order WHERE order_id=?::uuid",Integer.class,id));for(String d:List.of(a,b)){assertEquals("APPROVED",j.queryForObject("SELECT current_status FROM hrx.supply_demand WHERE demand_id=?::uuid",String.class,d));assertEquals(5,j.queryForObject("SELECT revision FROM hrx.supply_demand WHERE demand_id=?::uuid",Integer.class,d));assertEquals(0,j.queryForObject("SELECT count(*) FROM hrx.audit_event WHERE resource_id=?::uuid AND action_code='ISSUE_PO'",Integer.class,d));}assertEquals(0,j.queryForObject("SELECT count(*) FROM hrx.purchase_order_event WHERE order_id=?::uuid AND event_code='ISSUED'",Integer.class,id));}
+  finally{j.execute("DROP TRIGGER z_test_po_failure ON hrx.supply_event");j.execute("DROP FUNCTION hrx.test_po_failure()");}poEvent(1,id,1,"ISSUED",200);
+ }
+ @Test @EnabledIfEnvironmentVariable(named="HRX_BROWSER",matches="true") void browserMultiLineOrder() throws Exception{
+  String a=approved("TEST browser multi-line","CNY",1,"2","12"),b=approved("TEST browser multi-line","CNY",1,"3","12");BrowserRunner.run(port,"orders.mjs",Map.of("user1",token(1),"user2",token(2),"user6",token(6)),Map.of("HRX_E2E_LINES",JSON.writeValueAsString(admin().queryForList("SELECT bom_line FROM hrx.supply_demand WHERE demand_id IN (?::uuid,?::uuid) ORDER BY bom_line",String.class,a,b))));
+ }
+
+ @Test void authorizedProjectsStillCannotBeMixed() throws Exception{
+  UUID project=UUID.randomUUID();var j=admin();j.update("INSERT INTO hrx.business_project(project_id,project_code,project_name,org_unit_code) VALUES (?,?,'TEST PO extra project','TEST-ORG')",project,"TEST-PO-"+keyId());
+  for(int n=1;n<=2;n++)j.update("INSERT INTO hrx.capability_grant(user_id,project_id,resource_type,action_code,enabled,approved_by,approved_at) SELECT user_id,?,resource_type,action_code,true,approved_by,approved_at FROM hrx.capability_grant WHERE project_id=? AND user_id=?",project,PROJECT,user(n));
+  String a=approved("TEST project grouping","CNY",1,"1","1"),b=approvedAt(project,"TEST project grouping","CNY",1,"1","1");create(1,orderBody("TEST MIX PROJECT "+keyId(),a,b),keyId(),422);assertEquals(0,j.queryForObject("SELECT count(*) FROM hrx.purchase_order_line WHERE demand_id IN (?::uuid,?::uuid)",Integer.class,a,b));
+ }
+
+}

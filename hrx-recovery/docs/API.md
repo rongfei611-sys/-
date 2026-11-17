@@ -29,3 +29,15 @@ IQC：receiptId,acceptedQty,rejectedQty，总计等于收货批次。收货人�
 
 
 Recovery0.2的RETURN_REQUEST/RETURN_APPROVE/RETURN_REJECT/RETURN_SHIP payload、独立职责和补货数量定义见RETURNS.md。查询新增returned_qty（累计已退）、outstanding_rejected_qty（未退拒收）、receivable_qty（可收空间）；risk_code支持REPLACEMENT_PENDING。原累计收货和累计拒收不被覆盖。业务日期采用Asia/Shanghai。
+
+
+Recovery0.3多行订单（完整约束见PURCHASE_ORDERS.md）：
+
+- GET /purchase-orders?page=0&size=20&q=：按项目权限分页查询；金额为精确十进制字符串，无read_price返回null。
+- GET /purchase-orders/candidates：当前指定采购员的已批准且未预留需求，最多300行。
+- GET /purchase-orders/{id}、/{id}/lines、/{id}/events、/{id}/actions：授权订单及当前身份的动作提示；写入再次加锁校验。
+- POST /purchase-orders：orderNo,note,lines:[{demandId,expectedRevision}]，1–100行；同项目／标准化供应商／币种，数量价格不可覆盖。
+- POST /purchase-orders/{id}/events：expectedRevision,eventCode（APPROVED/REJECTED/ISSUED/CANCELLED）,note,evidenceRefs。批准和下单需证据；申请/采购/本轮报价作者不能整单自批。原子下单逐需求追加ISSUE_PO与审计。
+- GET /files?purchaseOrderId= 与 POST /files multipart purchaseOrderId：与demandId互斥，订单文件不可跨对象引用或移动版本。
+
+purchase_order资源read/create/approve/issue/cancel需人工配置，迁移不授予任何人员业务权限。订单读取同时需supply_chain:read；组单需create及供应链update/read_price；整单审批需approve及read_price。需求查询新增reserved_purchase_order_id/reserved_order_no/reserved_order_status，预留后单行ISSUE_PO/CANCEL返回409。整单退回或取消在下单前释放预留并保留历史；已下单变更流程未实现。

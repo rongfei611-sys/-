@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileController {
  private final FileService service;public FileController(FileService service){this.service=service;}
  @GetMapping("/status") public Map<String,Object> status(){return Map.of("enabled",service.configured());}
- @GetMapping public List<Map<String,Object>> list(@RequestParam UUID demandId){return service.list(demandId);}
- @PostMapping(consumes=MediaType.MULTIPART_FORM_DATA_VALUE) public Map<String,Object> upload(@RequestParam UUID demandId,@RequestParam(required=false) UUID documentId,@RequestParam int expectedVersion,@RequestPart MultipartFile file,@RequestHeader("Idempotency-Key") String key){return service.upload(demandId,documentId,expectedVersion,file,key);}
+ @GetMapping public List<Map<String,Object>> list(@RequestParam(required=false) UUID demandId,@RequestParam(required=false) UUID purchaseOrderId){return service.list(demandId,purchaseOrderId);}
+ @PostMapping(consumes=MediaType.MULTIPART_FORM_DATA_VALUE) public Map<String,Object> upload(@RequestParam(required=false) UUID demandId,@RequestParam(required=false) UUID purchaseOrderId,@RequestParam(required=false) UUID documentId,@RequestParam int expectedVersion,@RequestPart MultipartFile file,@RequestHeader("Idempotency-Key") String key){return service.upload(demandId,purchaseOrderId,documentId,expectedVersion,file,key);}
  @GetMapping("/{id}/content") public ResponseEntity<byte[]> download(@PathVariable UUID id){var f=service.download(id);return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).header("X-Content-Type-Options","nosniff").header("Cache-Control","no-store").header("Content-Disposition",ContentDisposition.attachment().filename(f.name(),StandardCharsets.UTF_8).build().toString()).body(f.bytes());}
 }
