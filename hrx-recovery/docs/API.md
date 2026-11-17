@@ -65,3 +65,13 @@ Recovery0.6新增project_delivery项目资源read/create/update/verify，不能�
 - GET /files?projectId= 及POST multipart projectId：与demandId/purchaseOrderId三选一，项目内共享文档不可跨对象移动。
 
 START/NOTE/RESCHEDULE/SUBMIT/CONFIRM/RETURN/CANCEL的职责、状态和证据定义见PROJECT_DELIVERY.md。SUBMIT/CONFIRM必须提供本项目证据，启用文件时验证真实CLEAN字节。独立复核不等于合同或质量验收。所有写入仍要求幂等键、版本、范围与同事务审计。
+
+
+Recovery0.7：
+
+- 创建里程碑可选predecessorIds，0–30个同项目已有未取消项，创建后关系固定，旧请求无依赖。
+- GET /project-delivery/milestones 新增state=BLOCKED与q标题搜索；返回predecessor_count/unconfirmed_predecessors/active_successors/late_predecessor_dates/blocked。
+- GET /project-delivery/milestones/{id}/dependencies 返回前置、后续及successorTotal，后续最多显示100项。
+- START/SUBMIT/CONFIRM检查前置全部CONFIRMED，CANCEL检查无未取消后续；冲突409，不自动串联状态。
+
+同项目/RLS、并发与旧幂等指纹兼容定义见MILESTONE_DEPENDENCIES.md。不提供后续改关系API或自动基线变更。
