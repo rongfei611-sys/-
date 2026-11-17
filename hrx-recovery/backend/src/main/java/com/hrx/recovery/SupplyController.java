@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SupplyController {
  private final JdbcTemplate jdbc;private final ApiSupport api;private final IdempotencyService keys;private final FileService files;
  public SupplyController(JdbcTemplate jdbc,ApiSupport api,IdempotencyService keys,FileService files){this.jdbc=jdbc;this.api=api;this.keys=keys;this.files=files;}
- @GetMapping("/projects") public List<Map<String,Object>> projects(){return jdbc.queryForList("SELECT project_id::text,project_code,project_name FROM hrx.business_project ORDER BY project_code LIMIT 300");}
+ @GetMapping("/projects") public List<Map<String,Object>> projects(){return jdbc.queryForList("SELECT project_id::text,project_code,project_name FROM hrx.business_project WHERE hrx.allowed(project_id,'supply_chain','read') OR hrx.allowed(project_id,'supply_chain','create') ORDER BY project_code LIMIT 300");}
  @GetMapping("/projects/{id}/participants") public List<Map<String,Object>> buyers(@PathVariable UUID id){return jdbc.queryForList("SELECT * FROM hrx.supply_buyers(?)",id);}
  static final String SELECT="SELECT d.*,p.reserved_purchase_order_id,p.reserved_order_no,p.reserved_order_status FROM hrx.supply_progress d LEFT JOIN LATERAL hrx.po_reservation(d.demand_id) p ON true";
  @GetMapping("/demands") public Map<String,Object> list(@RequestParam(defaultValue="0") @Min(0) @Max(100000) int page,@RequestParam(defaultValue="20") @Min(1) @Max(100) int size,@RequestParam(required=false) @Size(max=120) String q){

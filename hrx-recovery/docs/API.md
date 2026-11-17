@@ -53,3 +53,15 @@ Recovery0.4读模型（定义见DELIVERY_READINESS.md）：
 
 
 Recovery0.5增加 /supply-chain/followups 列表、详情、events以及创建/追加事件。沿用项目supply_chain:read/update与需求申请人/采购员职责，固定由需求采购员负责；完整请求字段与状态见FOLLOWUPS.md。所有写入继续要求幂等键、版本和同事务审计，任务状态不更改业务单据状态。
+
+
+Recovery0.6新增project_delivery项目资源read/create/update/verify，不能继承或授予采购范围：
+
+- GET /project-delivery/projects、/projects/{id}/participants：授权项目统计及可负责员工，分别最多300条。
+- GET /project-delivery/milestones?projectId=&state=ALL&page=0&size=20：最多100行/页，state支持全部状态及OVERDUE。
+- GET /project-delivery/milestones/{id}、/{id}/events。
+- POST /project-delivery/milestones：projectId,title,plannedDate,responsibleUserId。
+- POST /project-delivery/milestones/{id}/events：expectedRevision,eventCode,note,plannedDate,evidenceRefs。
+- GET /files?projectId= 及POST multipart projectId：与demandId/purchaseOrderId三选一，项目内共享文档不可跨对象移动。
+
+START/NOTE/RESCHEDULE/SUBMIT/CONFIRM/RETURN/CANCEL的职责、状态和证据定义见PROJECT_DELIVERY.md。SUBMIT/CONFIRM必须提供本项目证据，启用文件时验证真实CLEAN字节。独立复核不等于合同或质量验收。所有写入仍要求幂等键、版本、范围与同事务审计。

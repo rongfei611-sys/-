@@ -1,0 +1,30 @@
+package com.hrx.recovery;
+import java.util.*;import java.time.LocalDate;
+import jakarta.validation.Valid;import jakarta.validation.constraints.*;
+import org.springframework.http.HttpStatus;import org.springframework.jdbc.core.JdbcTemplate;import org.springframework.validation.annotation.Validated;import org.springframework.web.bind.annotation.*;import org.springframework.web.server.ResponseStatusException;
+@RestController @RequestMapping("/api/v1/project-delivery") @Validated
+public class DeliveryController {
+ private final JdbcTemplate jdbc;private final ApiSupport api;private final IdempotencyService keys;private final FileService files;
+ public DeliveryController(JdbcTemplate jdbc,ApiSupport api,IdempotencyService keys,FileService files){this.jdbc=jdbc;this.api=api;this.keys=keys;this.files=files;}
+ static final String BASE=" FROM hrx.delivery_milestone m JOIN hrx.business_project p ON p.project_id=m.project_id";
+ static final String SELECT="SELECT m.*,p.project_code,p.project_name,(m.current_status NOT IN ('CONFIRMED','CANCELLED') AND m.planned_date<current_date) overdue,current_date business_date"+BASE;
+ @GetMapping("/projects") public List<Map<String,Object>> projects(){return jdbc.queryForList("""
+  SELECT p.project_id::text,p.project_code,p.project_name,count(m.milestone_id) total_milestones,
+  count(m.milestone_id) FILTER(WHERE m.current_status='CONFIRMED') confirmed_milestones,
+  count(m.milestone_id) FILTER(WHERE m.current_status='SUBMITTED') submitted_milestones,
+  count(m.milestone_id) FILTER(WHERE m.current_status NOT IN ('CONFIRMED','CANCELLED') AND m.planned_date<current_date) overdue_milestones
+  FROM hrx.business_project p LEFT JOIN hrx.delivery_milestone m ON m.project_id=p.project_id
+  WHERE hrx.allowed(p.project_id,'project_delivery','read') GROUP BY p.project_id ORDER BY p.project_code,p.project_id LIMIT 300
+  """);}
+ @GetMapping("/projects/{id}/participants") public List<Map<String,Object>> participants(@PathVariable UUID id){return jdbc.queryForList("SELECT * FROM hrx.delivery_participants(?)",id);}
+ @GetMapping("/milestones") public Map<String,Object> list(@RequestParam(defaultValue="0") @Min(0) @Max(100000) int page,@RequestParam(defaultValue="20") @Min(1) @Max(100) int size,@RequestParam(defaultValue="ALL") String state,@RequestParam(required=false) UUID projectId){
+  String where=" WHERE 1=1";var args=new ArrayList<Object>();switch(state){case "ALL"->{}case "PLANNED","IN_PROGRESS","SUBMITTED","CONFIRMED","CANCELLED"->{where+=" AND m.current_status=?";args.add(state);}case "OVERDUE"->where+=" AND m.current_status NOT IN ('CONFIRMED','CANCELLED') AND m.planned_date<current_date";default->throw new IllegalArgumentException("不支持的里程碑筛选");}if(projectId!=null){where+=" AND m.project_id=?";args.add(projectId);}
+  Long count=jdbc.queryForObject("SELECT count(*)"+BASE+where,Long.class,args.toArray());args.add(size);args.add(page*size);return Map.of("items",jdbc.queryForList(SELECT+where+" ORDER BY m.planned_date,m.milestone_id LIMIT ? OFFSET ?",args.toArray()),"total",count,"page",page,"size",size);
+ }
+ @GetMapping("/milestones/{id}") public Map<String,Object> get(@PathVariable UUID id){var rows=jdbc.queryForList(SELECT+" WHERE m.milestone_id=?",id);if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"里程碑不存在或无权访问");return rows.getFirst();}
+ @GetMapping("/milestones/{id}/events") public List<Map<String,Object>> events(@PathVariable UUID id){get(id);return jdbc.queryForList("SELECT event_id::text,event_code,expected_revision,note,planned_date,previous_planned_date,evidence_refs::text,actor_user_id::text,occurred_at FROM hrx.delivery_milestone_event WHERE milestone_id=? ORDER BY expected_revision",id);}
+ @PostMapping("/milestones") public Map<String,Object> create(@Valid @RequestBody Create req,@RequestHeader("Idempotency-Key") String key){UUID actor=api.actor();return keys.execute(actor,"milestone.create",key,req,()->{UUID id=jdbc.queryForObject("SELECT hrx.create_milestone(?,?,?,?)",UUID.class,req.projectId(),req.title(),req.plannedDate(),req.responsibleUserId());api.audit(actor,"milestone.create",id,Map.of("projectId",req.projectId().toString()));return Map.of("milestone_id",id.toString(),"revision",0);});}
+ @PostMapping("/milestones/{id}/events") public Map<String,Object> append(@PathVariable UUID id,@Valid @RequestBody Event req,@RequestHeader("Idempotency-Key") String key){UUID actor=api.actor();return keys.execute(actor,"milestone.event."+id,key,req,()->{var m=get(id);files.requireProjectEvidence((UUID)m.get("project_id"),req.evidenceRefs());UUID event=jdbc.queryForObject("SELECT hrx.apply_milestone_event(?,?,?,?,?,?::jsonb)",UUID.class,id,req.expectedRevision(),req.eventCode(),req.note(),req.plannedDate(),api.encode(req.evidenceRefs()));api.audit(actor,"milestone."+req.eventCode(),id,Map.of("eventId",event.toString()));return Map.of("event_id",event.toString(),"revision",req.expectedRevision()+1);});}
+ public record Create(@NotNull UUID projectId,@NotBlank @Size(min=2,max=240) String title,@NotNull LocalDate plannedDate,@NotNull UUID responsibleUserId){}
+ public record Event(@NotNull @Min(0) Integer expectedRevision,@NotNull @Pattern(regexp="START|NOTE|RESCHEDULE|SUBMIT|CONFIRM|RETURN|CANCEL") String eventCode,@NotBlank @Size(min=2,max=4000) String note,LocalDate plannedDate,@NotNull @Size(max=50) List<@NotNull @Pattern(regexp="hrx-file:[A-Za-z0-9][A-Za-z0-9/_-]{0,500}") String> evidenceRefs){}
+}
