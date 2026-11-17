@@ -1,0 +1,11 @@
+{
+  "recovery_version": "0.1.0",
+  "source_commit": "3dc2412b30cee0cc5b06ece96c3fe44feb7baea5",
+  "files": 47,
+  "archive_sha256": "76d2864ea920c1b3dde1e52bad23cb625c52e45ac9a3657e049effcb4cb8dc51",
+  "backend_tests": 17,
+  "node_tests": 8,
+  "browser_suites": 2,
+  "original_v19_5_restored": false,
+  "status": "independent reconstruction; not production release"
+}
