@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {followupActions} from './followup.js';
+const t={current_status:'OPEN',assigned_to:'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',created_by:'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'},caps={supply_chain:{update:true}};
+test('跟进责任人可记录延期完成，创建人可记录取消，其他身份默认拒绝',()=>{assert.deepEqual(followupActions(t,t.assigned_to.toLowerCase(),caps),['NOTE','RESCHEDULE','COMPLETE']);assert.deepEqual(followupActions(t,t.created_by,caps),['NOTE','CANCEL']);assert.deepEqual(followupActions(t,'outsider',caps),[]);assert.deepEqual(followupActions(t,t.assigned_to,{}),[]);assert.deepEqual(followupActions({...t,current_status:'DONE'},t.assigned_to,caps),[]);});

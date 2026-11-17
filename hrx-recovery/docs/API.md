@@ -50,3 +50,6 @@ Recovery0.4读模型（定义见DELIVERY_READINESS.md）：
 - GET /supply-chain/readiness/{project}/demands?filter=SHORTAGE&page=0&size=20：项目范围内分页筛选明细，按关键路径和需用日期排列。filter为ALL/SHORTAGE/READY/OVERDUE/CRITICAL/IQC/REJECTED/PROMISE_MISSING/PROMISE_LATE/REPLACEMENT，非法值400。
 
 项目齐套沿用supply_chain:read；订单履约额外需purchase_order:read。新接口只读，不增加默认授权、不改变状态、不进行库存或财务过账。齐套率按行，取消行排除、空分母无率值，不按不同单位的数量求和。
+
+
+Recovery0.5增加 /supply-chain/followups 列表、详情、events以及创建/追加事件。沿用项目supply_chain:read/update与需求申请人/采购员职责，固定由需求采购员负责；完整请求字段与状态见FOLLOWUPS.md。所有写入继续要求幂等键、版本和同事务审计，任务状态不更改业务单据状态。

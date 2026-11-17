@@ -1,0 +1,5 @@
+import {request} from './client.js';import {sameId} from './workflow.js';
+const base='/api/v1/supply-chain/followups',write=(url,body,key)=>request(url,{method:'POST',body:JSON.stringify(body),headers:{'Idempotency-Key':key}});
+export const followups={list:params=>request(`${base}?${new URLSearchParams(params)}`),get:id=>request(`${base}/${encodeURIComponent(id)}`),events:id=>request(`${base}/${encodeURIComponent(id)}/events`),create:(body,key)=>write(base,body,key),append:(id,body,key)=>write(`${base}/${encodeURIComponent(id)}/events`,body,key)};
+export const followupLabels={NOTE:'追加跟进记录',RESCHEDULE:'调整到期日',COMPLETE:'完成跟进',CANCEL:'取消跟进'},followupStatus={OPEN:'待跟进',DONE:'跟进已完成',CANCELLED:'跟进已取消'};
+export function followupActions(task,actor,caps){if(!task||task.current_status!=='OPEN'||!caps.supply_chain?.update)return [];const assigned=sameId(task.assigned_to,actor),creator=sameId(task.created_by,actor),out=[];if(assigned||creator)out.push('NOTE');if(assigned)out.push('RESCHEDULE','COMPLETE');if(creator)out.push('CANCEL');return out;}
