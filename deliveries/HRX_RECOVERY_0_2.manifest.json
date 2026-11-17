@@ -1,0 +1,13 @@
+{
+  "recovery_version": "0.2.0",
+  "source_commit": "da35d7be0febf3f4d120d1de1836cb9a6d8ed339",
+  "files": 54,
+  "archive_sha256": "84d09d3dabd7edf221d91ba949431f9df6eac14966ac173069f9efe140fa737c",
+  "backend_tests": 23,
+  "node_tests": 12,
+  "browser_suites": 3,
+  "migration_chain": "recovery V001-V004; not original schema",
+  "new_features": "Independent rejected returns, shipment evidence, replacement receipt/IQC; gross history preserved",
+  "original_v19_5_restored": false,
+  "production_ready": false
+}
