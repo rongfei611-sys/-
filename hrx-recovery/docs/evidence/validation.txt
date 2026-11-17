@@ -6,51 +6,52 @@ CREATE ROLE
 GRANT ROLE
 DO
 
-added 22 packages in 903ms
+added 22 packages in 904ms
 
-> hrx-recovery-ui@0.3.0 test
+> hrx-recovery-ui@0.4.0 test
 > node --test src/*.test.mjs
 
-✔ URL/身份默认拒绝，不从localStorage或查询参数取令牌 (1.094232ms)
-✔ 写操作幂等、multipart边界和Bearer二进制下载 (27.41876ms)
-✔ 订单只能组合相同项目、标准化供应商和币种 (0.658908ms)
-✔ 已预留需求不能单行下单或取消 (1.298285ms)
-✔ 申请人/采购人不能自批，即使同时有审批能力 (2.080365ms)
-✔ 缺省拒绝和独立价格授权 (0.150183ms)
-✔ 本轮报价作者不能批准 (0.163883ms)
-✔ 收货与检验分离，已检验批次不可复检 (0.233857ms)
-✔ 终态无动作，批准后取消需独立授权 (0.245414ms)
-✔ 请求不变重试键不变，修改请求更换键 (3.044044ms)
-✔ 拒收退货申请、批准和发运继续职责分离 (0.993864ms)
-✔ 退货申请退回后可重新发起，同一检验的活跃申请不能重复 (0.177223ms)
-✔ 同一收货UUID的大小写不绕过前端已检验识别 (0.196872ms)
-✔ 业务日期按上海时区跨日，而非浏览器UTC截断 (12.018803ms)
-ℹ tests 14
+✔ URL/身份默认拒绝，不从localStorage或查询参数取令牌 (1.125956ms)
+✔ 写操作幂等、multipart边界和Bearer二进制下载 (24.503302ms)
+✔ 订单只能组合相同项目、标准化供应商和币种 (0.653988ms)
+✔ 已预留需求不能单行下单或取消 (1.324611ms)
+✔ 齐套率只按未取消需求行计算，空项目不伪造百分比 (0.698013ms)
+✔ 申请人/采购人不能自批，即使同时有审批能力 (2.530636ms)
+✔ 缺省拒绝和独立价格授权 (0.144394ms)
+✔ 本轮报价作者不能批准 (0.146106ms)
+✔ 收货与检验分离，已检验批次不可复检 (0.293465ms)
+✔ 终态无动作，批准后取消需独立授权 (0.247647ms)
+✔ 请求不变重试键不变，修改请求更换键 (2.981893ms)
+✔ 拒收退货申请、批准和发运继续职责分离 (1.045378ms)
+✔ 退货申请退回后可重新发起，同一检验的活跃申请不能重复 (0.142191ms)
+✔ 同一收货UUID的大小写不绕过前端已检验识别 (0.21618ms)
+✔ 业务日期按上海时区跨日，而非浏览器UTC截断 (11.957656ms)
+ℹ tests 15
 ℹ suites 0
-ℹ pass 14
+ℹ pass 15
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 188.458132
+ℹ duration_ms 231.889909
 
-> hrx-recovery-ui@0.3.0 build
+> hrx-recovery-ui@0.4.0 build
 > vite build
 
 vite v8.3.8 building client environment for production...
 transforming...
-✓ 20 modules transformed.
+✓ 23 modules transformed.
 rendering chunks...
 computing gzip size...
 dist/index.html                   0.36 kB │ gzip:  0.29 kB
-dist/assets/index-DVjsaffl.css    5.20 kB │ gzip:  1.79 kB
-dist/assets/index-DXEzZZAu.js   257.14 kB │ gzip: 79.74 kB
+dist/assets/index-HY45F16I.css    5.51 kB │ gzip:  1.85 kB
+dist/assets/index-C7XRm9BA.js   267.27 kB │ gzip: 81.76 kB
 
-✓ built in 111ms
+✓ built in 123ms
 [INFO] Scanning for projects...
 [INFO] 
 [INFO] ------------------------< com.hrx:hrx-recovery >------------------------
-[INFO] Building hrx-recovery 0.3.0-SNAPSHOT
+[INFO] Building hrx-recovery 0.4.0-SNAPSHOT
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -59,11 +60,11 @@ dist/assets/index-DXEzZZAu.js   257.14 kB │ gzip: 79.74 kB
 [INFO] 
 [INFO] --- resources:3.3.1:resources (default-resources) @ hrx-recovery ---
 [INFO] Copying 1 resource from src/main/resources to target/classes
-[INFO] Copying 5 resources from src/main/resources to target/classes
+[INFO] Copying 6 resources from src/main/resources to target/classes
 [INFO] 
 [INFO] --- compiler:3.13.0:compile (default-compile) @ hrx-recovery ---
 [INFO] Recompiling the module because of changed source code.
-[INFO] Compiling 11 source files with javac [debug parameters release 21] to target/classes
+[INFO] Compiling 12 source files with javac [debug parameters release 21] to target/classes
 [INFO] 
 [INFO] --- resources:3.3.1:testResources (default-testResources) @ hrx-recovery ---
 [INFO] skip non existing resourceDirectory /workspace/-/hrx-recovery/backend/src/test/resources
@@ -79,8 +80,8 @@ dist/assets/index-DXEzZZAu.js   257.14 kB │ gzip: 79.74 kB
 [INFO]  T E S T S
 [INFO] -------------------------------------------------------
 [INFO] Running com.hrx.recovery.PurchaseOrderIntegrationTest
-03:42:31.909 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.hrx.recovery.PurchaseOrderIntegrationTest]: PurchaseOrderIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-03:42:32.025 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.hrx.recovery.RecoveryApplication for test class com.hrx.recovery.PurchaseOrderIntegrationTest
+06:07:20.598 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.hrx.recovery.PurchaseOrderIntegrationTest]: PurchaseOrderIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+06:07:20.730 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.hrx.recovery.RecoveryApplication for test class com.hrx.recovery.PurchaseOrderIntegrationTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -91,45 +92,46 @@ dist/assets/index-DXEzZZAu.js   257.14 kB │ gzip: 79.74 kB
 
  :: Spring Boot ::                (v3.4.4)
 
-2026-11-17T03:42:33.260Z  INFO 11857 --- [           main] c.h.r.PurchaseOrderIntegrationTest       : Starting PurchaseOrderIntegrationTest using Java 21.0.12.1 with PID 11857 (started by agent in /workspace/-/hrx-recovery/backend)
-2026-11-17T03:42:33.261Z  INFO 11857 --- [           main] c.h.r.PurchaseOrderIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
-2026-11-17T03:42:34.067Z  INFO 11857 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
-2026-11-17T03:42:34.077Z  INFO 11857 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-11-17T03:42:34.078Z  INFO 11857 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
-2026-11-17T03:42:34.116Z  INFO 11857 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-11-17T03:42:34.116Z  INFO 11857 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 844 ms
-2026-11-17T03:42:34.368Z  INFO 11857 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:48213/hrx_test_recovery (PostgreSQL 17.11)
-2026-11-17T03:42:34.406Z  INFO 11857 --- [           main] o.f.core.internal.database.base.Schema   : Creating schema "hrx" ...
-2026-11-17T03:42:34.410Z  INFO 11857 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "hrx"."flyway_schema_history" ...
-2026-11-17T03:42:34.446Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "hrx": null
-2026-11-17T03:42:34.478Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "001 - recovery security and procurement"
-2026-11-17T03:42:34.483Z  WARN 11857 --- [           main] o.f.c.i.s.DefaultSqlScriptExecutor       : DB: schema "hrx" already exists, skipping (SQL State: 42P06 - Error Code: 0)
-2026-11-17T03:42:34.531Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "002 - private file versions"
-2026-11-17T03:42:34.548Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "003 - recovery validation guards"
-2026-11-17T03:42:34.565Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "004 - rejected returns and replacement"
-2026-11-17T03:42:34.585Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "005 - multi line purchase orders"
-2026-11-17T03:42:34.615Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 5 migrations to schema "hrx", now at version v005 (execution time 00:00.078s)
-2026-11-17T03:42:34.658Z  INFO 11857 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter filterRegistration was not registered (disabled)
-2026-11-17T03:42:35.090Z  INFO 11857 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 37601 (http) with context path '/'
-2026-11-17T03:42:35.096Z  INFO 11857 --- [           main] c.h.r.PurchaseOrderIntegrationTest       : Started PurchaseOrderIntegrationTest in 2.974 seconds (process running for 3.761)
+2026-11-17T06:07:21.939Z  INFO 18284 --- [           main] c.h.r.PurchaseOrderIntegrationTest       : Starting PurchaseOrderIntegrationTest using Java 21.0.12.1 with PID 18284 (started by agent in /workspace/-/hrx-recovery/backend)
+2026-11-17T06:07:21.940Z  INFO 18284 --- [           main] c.h.r.PurchaseOrderIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2026-11-17T06:07:22.875Z  INFO 18284 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
+2026-11-17T06:07:22.900Z  INFO 18284 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-17T06:07:22.900Z  INFO 18284 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-11-17T06:07:22.926Z  INFO 18284 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-11-17T06:07:22.926Z  INFO 18284 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 972 ms
+2026-11-17T06:07:23.185Z  INFO 18284 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:58479/hrx_test_recovery (PostgreSQL 17.11)
+2026-11-17T06:07:23.211Z  INFO 18284 --- [           main] o.f.core.internal.database.base.Schema   : Creating schema "hrx" ...
+2026-11-17T06:07:23.215Z  INFO 18284 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "hrx"."flyway_schema_history" ...
+2026-11-17T06:07:23.249Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "hrx": null
+2026-11-17T06:07:23.295Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "001 - recovery security and procurement"
+2026-11-17T06:07:23.305Z  WARN 18284 --- [           main] o.f.c.i.s.DefaultSqlScriptExecutor       : DB: schema "hrx" already exists, skipping (SQL State: 42P06 - Error Code: 0)
+2026-11-17T06:07:23.357Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "002 - private file versions"
+2026-11-17T06:07:23.376Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "003 - recovery validation guards"
+2026-11-17T06:07:23.412Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "004 - rejected returns and replacement"
+2026-11-17T06:07:23.432Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "005 - multi line purchase orders"
+2026-11-17T06:07:23.467Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "hrx" to version "006 - delivery read models"
+2026-11-17T06:07:23.482Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 6 migrations to schema "hrx", now at version v006 (execution time 00:00.117s)
+2026-11-17T06:07:23.528Z  INFO 18284 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter filterRegistration was not registered (disabled)
+2026-11-17T06:07:24.014Z  INFO 18284 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 44571 (http) with context path '/'
+2026-11-17T06:07:24.022Z  INFO 18284 --- [           main] c.h.r.PurchaseOrderIntegrationTest       : Started PurchaseOrderIntegrationTest in 3.177 seconds (process running for 4.028)
 Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
-OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
 WARNING: A Java agent has been loaded dynamically (/home/agent/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar)
 WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
 WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
 WARNING: Dynamic loading of agents will be disallowed by default in a future release
-2026-11-17T03:42:36.199Z  INFO 11857 --- [1-auto-1-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-11-17T03:42:36.199Z  INFO 11857 --- [1-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-11-17T03:42:36.201Z  INFO 11857 --- [1-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2026-11-17T03:42:36.341Z  INFO 11857 --- [1-auto-1-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-11-17T03:42:36.357Z  INFO 11857 --- [1-auto-1-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7a371527
-2026-11-17T03:42:36.358Z  INFO 11857 --- [1-auto-1-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.87 s -- in com.hrx.recovery.PurchaseOrderIntegrationTest
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-11-17T06:07:25.126Z  INFO 18284 --- [1-auto-1-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-17T06:07:25.127Z  INFO 18284 --- [1-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-17T06:07:25.129Z  INFO 18284 --- [1-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-11-17T06:07:25.292Z  INFO 18284 --- [1-auto-1-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-17T06:07:25.306Z  INFO 18284 --- [1-auto-1-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4f131a5
+2026-11-17T06:07:25.307Z  INFO 18284 --- [1-auto-1-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.20 s -- in com.hrx.recovery.PurchaseOrderIntegrationTest
 [INFO] Running com.hrx.recovery.TxIdentityFilterTest
-[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.458 s -- in com.hrx.recovery.TxIdentityFilterTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.464 s -- in com.hrx.recovery.TxIdentityFilterTest
 [INFO] Running com.hrx.recovery.RecoveryIntegrationTest
-2026-11-17T03:42:44.149Z  INFO 11857 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.hrx.recovery.RecoveryIntegrationTest]: RecoveryIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2026-11-17T03:42:44.153Z  INFO 11857 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.hrx.recovery.RecoveryApplication for test class com.hrx.recovery.RecoveryIntegrationTest
+2026-11-17T06:07:38.158Z  INFO 18284 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.hrx.recovery.RecoveryIntegrationTest]: RecoveryIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-17T06:07:38.192Z  INFO 18284 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.hrx.recovery.RecoveryApplication for test class com.hrx.recovery.RecoveryIntegrationTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -140,30 +142,30 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
 
  :: Spring Boot ::                (v3.4.4)
 
-2026-11-17T03:42:44.232Z  INFO 11857 --- [           main] c.hrx.recovery.RecoveryIntegrationTest   : Starting RecoveryIntegrationTest using Java 21.0.12.1 with PID 11857 (started by agent in /workspace/-/hrx-recovery/backend)
-2026-11-17T03:42:44.232Z  INFO 11857 --- [           main] c.hrx.recovery.RecoveryIntegrationTest   : No active profile set, falling back to 1 default profile: "default"
-2026-11-17T03:42:44.625Z  INFO 11857 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
-2026-11-17T03:42:44.626Z  INFO 11857 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-11-17T03:42:44.626Z  INFO 11857 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
-2026-11-17T03:42:44.637Z  INFO 11857 --- [           main] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
-2026-11-17T03:42:44.637Z  INFO 11857 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 402 ms
-2026-11-17T03:42:44.718Z  INFO 11857 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:48213/hrx_test_recovery (PostgreSQL 17.11)
-2026-11-17T03:42:44.730Z  INFO 11857 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 6 migrations (execution time 00:00.008s)
-2026-11-17T03:42:44.742Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "hrx": 005
-2026-11-17T03:42:44.742Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Schema "hrx" is up to date. No migration necessary.
-2026-11-17T03:42:44.762Z  INFO 11857 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter filterRegistration was not registered (disabled)
-2026-11-17T03:42:45.052Z  INFO 11857 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 45225 (http) with context path '/'
-2026-11-17T03:42:45.056Z  INFO 11857 --- [           main] c.hrx.recovery.RecoveryIntegrationTest   : Started RecoveryIntegrationTest in 0.899 seconds (process running for 13.721)
-2026-11-17T03:42:45.401Z  INFO 11857 --- [1-auto-2-exec-1] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-11-17T03:42:45.402Z  INFO 11857 --- [1-auto-2-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-11-17T03:42:45.402Z  INFO 11857 --- [1-auto-2-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
-2026-11-17T03:42:45.458Z  INFO 11857 --- [1-auto-2-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
-2026-11-17T03:42:45.467Z  INFO 11857 --- [1-auto-2-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@76012bf7
-2026-11-17T03:42:45.468Z  INFO 11857 --- [1-auto-2-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
-[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.41 s -- in com.hrx.recovery.RecoveryIntegrationTest
+2026-11-17T06:07:38.304Z  INFO 18284 --- [           main] c.hrx.recovery.RecoveryIntegrationTest   : Starting RecoveryIntegrationTest using Java 21.0.12.1 with PID 18284 (started by agent in /workspace/-/hrx-recovery/backend)
+2026-11-17T06:07:38.304Z  INFO 18284 --- [           main] c.hrx.recovery.RecoveryIntegrationTest   : No active profile set, falling back to 1 default profile: "default"
+2026-11-17T06:07:38.656Z  INFO 18284 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
+2026-11-17T06:07:38.657Z  INFO 18284 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-17T06:07:38.657Z  INFO 18284 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-11-17T06:07:38.702Z  INFO 18284 --- [           main] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2026-11-17T06:07:38.702Z  INFO 18284 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 395 ms
+2026-11-17T06:07:38.759Z  INFO 18284 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:58479/hrx_test_recovery (PostgreSQL 17.11)
+2026-11-17T06:07:38.863Z  INFO 18284 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 7 migrations (execution time 00:00.011s)
+2026-11-17T06:07:38.903Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "hrx": 006
+2026-11-17T06:07:38.904Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Schema "hrx" is up to date. No migration necessary.
+2026-11-17T06:07:38.936Z  INFO 18284 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter filterRegistration was not registered (disabled)
+2026-11-17T06:07:39.156Z  INFO 18284 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 39673 (http) with context path '/'
+2026-11-17T06:07:39.160Z  INFO 18284 --- [           main] c.hrx.recovery.RecoveryIntegrationTest   : Started RecoveryIntegrationTest in 0.964 seconds (process running for 19.166)
+2026-11-17T06:07:39.471Z  INFO 18284 --- [1-auto-2-exec-1] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-17T06:07:39.471Z  INFO 18284 --- [1-auto-2-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-17T06:07:39.492Z  INFO 18284 --- [1-auto-2-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 21 ms
+2026-11-17T06:07:39.555Z  INFO 18284 --- [1-auto-2-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-11-17T06:07:39.560Z  INFO 18284 --- [1-auto-2-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@5d24d466
+2026-11-17T06:07:39.560Z  INFO 18284 --- [1-auto-2-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.47 s -- in com.hrx.recovery.RecoveryIntegrationTest
 [INFO] Running com.hrx.recovery.FileIntegrationTest
-2026-11-17T03:43:01.563Z  INFO 11857 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.hrx.recovery.FileIntegrationTest]: FileIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2026-11-17T03:43:01.571Z  INFO 11857 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.hrx.recovery.RecoveryApplication for test class com.hrx.recovery.FileIntegrationTest
+2026-11-17T06:07:56.626Z  INFO 18284 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.hrx.recovery.FileIntegrationTest]: FileIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-17T06:07:56.631Z  INFO 18284 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.hrx.recovery.RecoveryApplication for test class com.hrx.recovery.FileIntegrationTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -174,47 +176,47 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
 
  :: Spring Boot ::                (v3.4.4)
 
-2026-11-17T03:43:01.622Z  INFO 11857 --- [           main] com.hrx.recovery.FileIntegrationTest     : Starting FileIntegrationTest using Java 21.0.12.1 with PID 11857 (started by agent in /workspace/-/hrx-recovery/backend)
-2026-11-17T03:43:01.623Z  INFO 11857 --- [           main] com.hrx.recovery.FileIntegrationTest     : No active profile set, falling back to 1 default profile: "default"
-2026-11-17T03:43:01.823Z  INFO 11857 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
-2026-11-17T03:43:01.823Z  INFO 11857 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-11-17T03:43:01.824Z  INFO 11857 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
-2026-11-17T03:43:01.830Z  INFO 11857 --- [           main] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
-2026-11-17T03:43:01.830Z  INFO 11857 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 205 ms
-2026-11-17T03:43:01.866Z  INFO 11857 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:48213/hrx_test_recovery (PostgreSQL 17.11)
-2026-11-17T03:43:01.891Z  INFO 11857 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 6 migrations (execution time 00:00.021s)
-2026-11-17T03:43:01.899Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "hrx": 005
-2026-11-17T03:43:01.899Z  INFO 11857 --- [           main] o.f.core.internal.command.DbMigrate      : Schema "hrx" is up to date. No migration necessary.
-2026-11-17T03:43:01.908Z  INFO 11857 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter filterRegistration was not registered (disabled)
-2026-11-17T03:43:02.010Z  INFO 11857 --- [           main] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring TestDispatcherServlet ''
-2026-11-17T03:43:02.011Z  INFO 11857 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
-2026-11-17T03:43:02.011Z  INFO 11857 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
-2026-11-17T03:43:02.024Z  INFO 11857 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 44575 (http) with context path '/'
-2026-11-17T03:43:02.026Z  INFO 11857 --- [           main] com.hrx.recovery.FileIntegrationTest     : Started FileIntegrationTest in 0.451 seconds (process running for 30.69)
-2026-11-17T03:43:02.209Z  INFO 11857 --- [1-auto-3-exec-1] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-11-17T03:43:02.210Z  INFO 11857 --- [1-auto-3-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-11-17T03:43:02.211Z  INFO 11857 --- [1-auto-3-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2026-11-17T03:43:02.272Z  INFO 11857 --- [1-auto-3-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
-2026-11-17T03:43:02.294Z  INFO 11857 --- [1-auto-3-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@4b0b9163
-2026-11-17T03:43:02.294Z  INFO 11857 --- [1-auto-3-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
-[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.371 s -- in com.hrx.recovery.FileIntegrationTest
+2026-11-17T06:07:56.650Z  INFO 18284 --- [           main] com.hrx.recovery.FileIntegrationTest     : Starting FileIntegrationTest using Java 21.0.12.1 with PID 18284 (started by agent in /workspace/-/hrx-recovery/backend)
+2026-11-17T06:07:56.650Z  INFO 18284 --- [           main] com.hrx.recovery.FileIntegrationTest     : No active profile set, falling back to 1 default profile: "default"
+2026-11-17T06:07:56.846Z  INFO 18284 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
+2026-11-17T06:07:56.848Z  INFO 18284 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-17T06:07:56.848Z  INFO 18284 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-11-17T06:07:56.855Z  INFO 18284 --- [           main] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2026-11-17T06:07:56.855Z  INFO 18284 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 204 ms
+2026-11-17T06:07:56.912Z  INFO 18284 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:58479/hrx_test_recovery (PostgreSQL 17.11)
+2026-11-17T06:07:56.924Z  INFO 18284 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 7 migrations (execution time 00:00.006s)
+2026-11-17T06:07:56.931Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "hrx": 006
+2026-11-17T06:07:56.931Z  INFO 18284 --- [           main] o.f.core.internal.command.DbMigrate      : Schema "hrx" is up to date. No migration necessary.
+2026-11-17T06:07:56.941Z  INFO 18284 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter filterRegistration was not registered (disabled)
+2026-11-17T06:07:57.040Z  INFO 18284 --- [           main] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring TestDispatcherServlet ''
+2026-11-17T06:07:57.040Z  INFO 18284 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-17T06:07:57.041Z  INFO 18284 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-11-17T06:07:57.057Z  INFO 18284 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 39401 (http) with context path '/'
+2026-11-17T06:07:57.058Z  INFO 18284 --- [           main] com.hrx.recovery.FileIntegrationTest     : Started FileIntegrationTest in 0.425 seconds (process running for 37.065)
+2026-11-17T06:07:57.240Z  INFO 18284 --- [1-auto-3-exec-1] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-17T06:07:57.240Z  INFO 18284 --- [1-auto-3-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-17T06:07:57.240Z  INFO 18284 --- [1-auto-3-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-11-17T06:07:57.290Z  INFO 18284 --- [1-auto-3-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-11-17T06:07:57.294Z  INFO 18284 --- [1-auto-3-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@51729119
+2026-11-17T06:07:57.294Z  INFO 18284 --- [1-auto-3-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.355 s -- in com.hrx.recovery.FileIntegrationTest
 [INFO] 
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] 
 [INFO] --- jar:3.4.2:jar (default-jar) @ hrx-recovery ---
-[INFO] Building jar: /workspace/-/hrx-recovery/backend/target/hrx-recovery-0.3.0-SNAPSHOT.jar
+[INFO] Building jar: /workspace/-/hrx-recovery/backend/target/hrx-recovery-0.4.0-SNAPSHOT.jar
 [INFO] 
 [INFO] --- spring-boot:3.4.4:repackage (repackage) @ hrx-recovery ---
-[INFO] Replacing main artifact /workspace/-/hrx-recovery/backend/target/hrx-recovery-0.3.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
-[INFO] The original artifact has been renamed to /workspace/-/hrx-recovery/backend/target/hrx-recovery-0.3.0-SNAPSHOT.jar.original
+[INFO] Replacing main artifact /workspace/-/hrx-recovery/backend/target/hrx-recovery-0.4.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /workspace/-/hrx-recovery/backend/target/hrx-recovery-0.4.0-SNAPSHOT.jar.original
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  38.581 s
-[INFO] Finished at: 2026-11-17T03:43:06Z
+[INFO] Total time:  45.224 s
+[INFO] Finished at: 2026-11-17T06:08:01Z
 [INFO] ------------------------------------------------------------------------
 DO
 SET

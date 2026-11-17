@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readinessPercent} from './readiness.js';
+test('齐套率只按未取消需求行计算，空项目不伪造百分比',()=>{assert.equal(readinessPercent({active_lines:0,ready_lines:0}),null);assert.equal(readinessPercent({active_lines:'2',ready_lines:'1'}),'50.0%');assert.equal(readinessPercent({active_lines:3,ready_lines:1}),'33.3%');assert.equal(readinessPercent({active_lines:2,ready_lines:2}),'100.0%');});

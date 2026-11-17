@@ -15,13 +15,7 @@ public class SupplyController {
  public SupplyController(JdbcTemplate jdbc,ApiSupport api,IdempotencyService keys,FileService files){this.jdbc=jdbc;this.api=api;this.keys=keys;this.files=files;}
  @GetMapping("/projects") public List<Map<String,Object>> projects(){return jdbc.queryForList("SELECT project_id::text,project_code,project_name FROM hrx.business_project ORDER BY project_code LIMIT 300");}
  @GetMapping("/projects/{id}/participants") public List<Map<String,Object>> buyers(@PathVariable UUID id){return jdbc.queryForList("SELECT * FROM hrx.supply_buyers(?)",id);}
- static final String SELECT="""
- SELECT d.*,p.reserved_purchase_order_id,p.reserved_order_no,p.reserved_order_status,(quantity-accepted_qty) shortage_qty,(received_qty-accepted_qty-rejected_qty) pending_iqc_qty,(rejected_qty-returned_qty) outstanding_rejected_qty,(quantity-received_qty+returned_qty) receivable_qty,
- CASE WHEN current_status='CANCELLED' THEN 'CANCELLED' WHEN accepted_qty=quantity THEN 'READY' WHEN rejected_qty>returned_qty THEN 'IQC_REJECTED'
- WHEN required_date<current_date THEN 'OVERDUE' WHEN returned_qty>0 AND received_qty-returned_qty<quantity THEN 'REPLACEMENT_PENDING' WHEN current_status IN ('ORDERED','PART_RECEIVED','RECEIVED') AND promised_date IS NULL THEN 'PROMISE_MISSING'
- WHEN promised_date>required_date THEN 'PROMISE_LATE' WHEN current_status IN ('DRAFT','SUBMITTED','SOURCING','APPROVED') AND current_date>=required_date-lead_time_days THEN 'LEAD_TIME_RISK'
- WHEN received_qty>accepted_qty+rejected_qty THEN 'IQC_PENDING' ELSE 'IN_PROGRESS' END risk_code FROM hrx.supply_demand d LEFT JOIN LATERAL hrx.po_reservation(d.demand_id) p ON true
- """;
+ static final String SELECT="SELECT d.*,p.reserved_purchase_order_id,p.reserved_order_no,p.reserved_order_status FROM hrx.supply_progress d LEFT JOIN LATERAL hrx.po_reservation(d.demand_id) p ON true";
  @GetMapping("/demands") public Map<String,Object> list(@RequestParam(defaultValue="0") @Min(0) @Max(100000) int page,@RequestParam(defaultValue="20") @Min(1) @Max(100) int size,@RequestParam(required=false) @Size(max=120) String q){
   String where=" WHERE 1=1";var args=new ArrayList<Object>();if(q!=null&&!q.isBlank()){where+=" AND (bom_line ILIKE ? OR material_code ILIKE ? OR description ILIKE ?)";for(int i=0;i<3;i++)args.add("%"+q.trim()+"%");}
   Long count=jdbc.queryForObject("SELECT count(*) FROM hrx.supply_demand"+where,Long.class,args.toArray());args.add(size);args.add(page*size);

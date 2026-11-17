@@ -41,3 +41,12 @@ Recovery0.3多行订单（完整约束见PURCHASE_ORDERS.md）：
 - GET /files?purchaseOrderId= 与 POST /files multipart purchaseOrderId：与demandId互斥，订单文件不可跨对象引用或移动版本。
 
 purchase_order资源read/create/approve/issue/cancel需人工配置，迁移不授予任何人员业务权限。订单读取同时需supply_chain:read；组单需create及供应链update/read_price；整单审批需approve及read_price。需求查询新增reserved_purchase_order_id/reserved_order_no/reserved_order_status，预留后单行ISSUE_PO/CANCEL返回409。整单退回或取消在下单前释放预留并保留历史；已下单变更流程未实现。
+
+
+Recovery0.4读模型（定义见DELIVERY_READINESS.md）：
+
+- GET /purchase-orders/{id}/fulfillment：当前已签发订单的逐行履约与风险行数；精确数量为字符串，无价格。未下单或历史退回/取消订单的实时数量为null，不跟随重新组单后的收货。
+- GET /supply-chain/readiness?page=0&size=20&q=：授权项目的需求行数、取消行数、合格满量行数、缺口/关键路径/超期/待检/未退拒收/承诺/补货风险。
+- GET /supply-chain/readiness/{project}/demands?filter=SHORTAGE&page=0&size=20：项目范围内分页筛选明细，按关键路径和需用日期排列。filter为ALL/SHORTAGE/READY/OVERDUE/CRITICAL/IQC/REJECTED/PROMISE_MISSING/PROMISE_LATE/REPLACEMENT，非法值400。
+
+项目齐套沿用supply_chain:read；订单履约额外需purchase_order:read。新接口只读，不增加默认授权、不改变状态、不进行库存或财务过账。齐套率按行，取消行排除、空分母无率值，不按不同单位的数量求和。
