@@ -9,3 +9,5 @@
 当前检查点的真实验证见 docs/VALIDATION.md。源码已放入当前挂载仓库子目录 hrx-recovery，本地Git分支 recovery/hrx-20261117；不再只放临时目录。
 
 开发：JDK21、Maven3.9+、Node>=22.12、PostgreSQL16+。前端 npm ci / npm test / npm run build；后端使用全新隔离数据库引导角色后运行 mvn verify。真实数据库测试须设置 HRX_TEST_DB_URL，数据库名必须以 hrx_test_ 开头；HRX_BROWSER=true启用Chromium脚本。企业OIDC仍由部署壳注入HRX_AUTH，不存在时默认拒绝业务操作。
+
+最新完整隔离验证：17个JUnit、8个Node测试、两组浏览器实测、生产构建和数据库结构/授权恢复演练通过。ClamAV仅使用TEST签名库。运行与复现见 docs/OPERATIONS.md，接口见 docs/API.md；完整恢复缺失项仍见 docs/RECOVERY.md。
