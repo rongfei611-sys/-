@@ -1,0 +1,14 @@
+{
+  "recovery_version": "0.5.0",
+  "source_commit": "322e594d2930f1d6bf903027ce7237b574e38f29",
+  "files": 94,
+  "archive_sha256": "80df659b5de043334c72ce3c54b98319e3bce1e7397a187ef5ebefb1f0da04c2",
+  "backend_tests": 41,
+  "node_tests": 16,
+  "browser_suites": 6,
+  "migration_chain": "recovery V001-V007; not original schema",
+  "new_features": "Procurement followup tasks, ownership and project scope, overdue filtering, append-only notes and rescheduling history, manual completion/cancellation and concurrency control",
+  "development_direction": "Continue HRX_OS_CODEX_HANDOFF_V19_4 without waiting for missing originals",
+  "original_v19_5_restored": false,
+  "production_ready": false
+}
