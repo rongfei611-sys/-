@@ -1,0 +1,13 @@
+{
+  "recovery_version": "0.3.0",
+  "source_commit": "734c099dc1c65508dd72fb335336715e18ef7905",
+  "files": 71,
+  "archive_sha256": "67e3a1fdc7f90ca5906acd14b8155781f317b4ba6d095f4d874f7ffa72765482",
+  "backend_tests": 32,
+  "node_tests": 14,
+  "browser_suites": 4,
+  "migration_chain": "recovery V001-V005; not original schema",
+  "new_features": "Multi-line purchase orders, scope and segregation of duties, demand reservations, atomic issue, PO-specific controlled evidence",
+  "original_v19_5_restored": false,
+  "production_ready": false
+}
