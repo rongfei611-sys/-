@@ -1,0 +1,14 @@
+{
+  "recovery_version": "0.6.0",
+  "source_commit": "2a542c64aaca1161ab4e54d3e8ff4b2f497baff9",
+  "files": 108,
+  "archive_sha256": "1bc82038fa0450acf56b7ec60345374b19450e9942e81867e505f0148e373252",
+  "backend_tests": 48,
+  "node_tests": 17,
+  "browser_suites": 8,
+  "migration_chain": "recovery V001-V008; not original schema",
+  "new_features": "Project delivery milestones, assigned ownership, independent verification/return/resubmission, immutable date history and project-scoped controlled documents",
+  "development_direction": "Continue HRX_OS_CODEX_HANDOFF_V19_4 without waiting for missing originals",
+  "original_v19_5_restored": false,
+  "production_ready": false
+}
