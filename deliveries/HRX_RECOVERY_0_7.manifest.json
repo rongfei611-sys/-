@@ -1,0 +1,14 @@
+{
+  "recovery_version": "0.7.0",
+  "source_commit": "a9cbb34eb3a78d2bfeedbe4abf27b5f419300119",
+  "files": 116,
+  "archive_sha256": "eabc5b6692b8168712998eb2dd2600461b894a6a34e3425640a7b368d4e70647",
+  "backend_tests": 53,
+  "node_tests": 18,
+  "browser_suites": 9,
+  "migration_chain": "recovery V001-V009; not original schema",
+  "new_features": "Immutable milestone dependencies, blocked delivery search and navigation, predecessor confirmation gates, cancellation protection and legacy idempotency compatibility",
+  "development_direction": "Continue HRX_OS_CODEX_HANDOFF_V19_4 without waiting for missing originals",
+  "original_v19_5_restored": false,
+  "production_ready": false
+}
