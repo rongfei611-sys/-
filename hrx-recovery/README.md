@@ -1,4 +1,4 @@
-# HRX-OS 恢复工程
+# HRX-OS 恢复工程 0.2
 
 这是 2026-11-17 根据本对话可见代码与业务契约重建的独立开发工程，**不是原 V19.5 压缩包的完整恢复**。原 V001–V014、确认版HTML、旧模块全部源码和原测试证据已不可取得；不能声称原文件哈希或旧测试仍有效。
 
@@ -10,4 +10,7 @@
 
 开发：JDK21、Maven3.9+、Node>=22.12、PostgreSQL16+。前端 npm ci / npm test / npm run build；后端使用全新隔离数据库引导角色后运行 mvn verify。真实数据库测试须设置 HRX_TEST_DB_URL，数据库名必须以 hrx_test_ 开头；HRX_BROWSER=true启用Chromium脚本。企业OIDC仍由部署壳注入HRX_AUTH，不存在时默认拒绝业务操作。
 
-最新完整隔离验证：17个JUnit、8个Node测试、两组浏览器实测、生产构建和数据库结构/授权恢复演练通过。ClamAV仅使用TEST签名库。运行与复现见 docs/OPERATIONS.md，接口见 docs/API.md；完整恢复缺失项仍见 docs/RECOVERY.md。
+最新完整隔离验证：23个JUnit、12个Node测试、三组浏览器实测、生产构建和数据库结构/授权恢复演练通过。ClamAV仅使用TEST签名库。运行与复现见 docs/OPERATIONS.md，接口见 docs/API.md；完整恢复缺失项仍见 docs/RECOVERY.md。
+
+
+0.2新增拒收退货与补货闭环，见 docs/RETURNS.md。采购主链与文件服务均为新恢复工程；原旧版模块缺失项继续明确保留。0.1/0.2源码包、逐文件SHA256清单和外部校验文件保存在仓库deliveries/；公开备份已获得用户同意，源代码未合并main。

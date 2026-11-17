@@ -25,7 +25,7 @@ export HRX_TEST_ADMIN_USER="$(id -un)" HRX_TEST_ADMIN_PASSWORD="" HRX_TEST_APP_P
 "$PGBIN/pg_restore" -h 127.0.0.1 -p "$PORT" --exit-on-error -d hrx_test_restore "$TEMP/recovery.dump"
 "$PGBIN/psql" -h 127.0.0.1 -p "$PORT" -d hrx_test_restore -v ON_ERROR_STOP=1 <<'SQL'
 DO $$ BEGIN
- IF (SELECT count(*) FROM hrx.flyway_schema_history WHERE type='SQL' AND success)<>3 THEN RAISE EXCEPTION 'Incomplete recovery migrations';END IF;
+ IF (SELECT count(*) FROM hrx.flyway_schema_history WHERE type='SQL' AND success)<>4 THEN RAISE EXCEPTION 'Incomplete recovery migrations';END IF;
  IF has_table_privilege('hrx_recovery_app','hrx.supply_demand','UPDATE') OR has_column_privilege('hrx_recovery_app','hrx.supply_event','payload','SELECT') THEN RAISE EXCEPTION 'Unsafe restored grants';END IF;
 END $$;
 SET ROLE hrx_recovery_app;

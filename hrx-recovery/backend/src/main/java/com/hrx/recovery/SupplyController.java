@@ -16,9 +16,9 @@ public class SupplyController {
  @GetMapping("/projects") public List<Map<String,Object>> projects(){return jdbc.queryForList("SELECT project_id::text,project_code,project_name FROM hrx.business_project ORDER BY project_code LIMIT 300");}
  @GetMapping("/projects/{id}/participants") public List<Map<String,Object>> buyers(@PathVariable UUID id){return jdbc.queryForList("SELECT * FROM hrx.supply_buyers(?)",id);}
  static final String SELECT="""
- SELECT d.*,(quantity-accepted_qty) shortage_qty,(received_qty-accepted_qty-rejected_qty) pending_iqc_qty,
- CASE WHEN current_status='CANCELLED' THEN 'CANCELLED' WHEN accepted_qty=quantity THEN 'READY' WHEN rejected_qty>0 THEN 'IQC_REJECTED'
- WHEN required_date<current_date THEN 'OVERDUE' WHEN current_status IN ('ORDERED','PART_RECEIVED','RECEIVED') AND promised_date IS NULL THEN 'PROMISE_MISSING'
+ SELECT d.*,(quantity-accepted_qty) shortage_qty,(received_qty-accepted_qty-rejected_qty) pending_iqc_qty,(rejected_qty-returned_qty) outstanding_rejected_qty,(quantity-received_qty+returned_qty) receivable_qty,
+ CASE WHEN current_status='CANCELLED' THEN 'CANCELLED' WHEN accepted_qty=quantity THEN 'READY' WHEN rejected_qty>returned_qty THEN 'IQC_REJECTED'
+ WHEN required_date<current_date THEN 'OVERDUE' WHEN returned_qty>0 AND received_qty-returned_qty<quantity THEN 'REPLACEMENT_PENDING' WHEN current_status IN ('ORDERED','PART_RECEIVED','RECEIVED') AND promised_date IS NULL THEN 'PROMISE_MISSING'
  WHEN promised_date>required_date THEN 'PROMISE_LATE' WHEN current_status IN ('DRAFT','SUBMITTED','SOURCING','APPROVED') AND current_date>=required_date-lead_time_days THEN 'LEAD_TIME_RISK'
  WHEN received_qty>accepted_qty+rejected_qty THEN 'IQC_PENDING' ELSE 'IN_PROGRESS' END risk_code FROM hrx.supply_demand d
  """;
@@ -40,5 +40,5 @@ public class SupplyController {
   api.audit(actor,req.eventCode(),id,Map.of("eventId",event.toString()));return Map.of("event_id",event.toString(),"revision",req.expectedRevision()+1);
  });}
  public record Demand(@NotNull UUID projectId,@NotBlank @Size(max=80) String bomLine,@NotBlank @Size(max=120) String materialCode,@NotBlank @Size(min=2,max=1000) String description,@NotBlank @Size(max=20) String unit,@NotNull @DecimalMin(value="0",inclusive=false) @Digits(integer=14,fraction=4) BigDecimal quantity,@NotNull LocalDate requiredDate,@Min(0) @Max(3650) int leadTimeDays,boolean criticalPath,@NotNull UUID buyerUserId){}
- public record Event(@NotNull @Min(0) Integer expectedRevision,@NotNull @Pattern(regexp="SUBMIT|OPEN_RFQ|QUOTE|APPROVE|REJECT|ISSUE_PO|PROMISE|RECEIVE|IQC|CANCEL") String eventCode,@NotBlank @Size(min=2,max=4000) String note,@NotNull @Size(max=20) Map<String,Object> payload,@NotNull @Size(max=50) List<@NotNull @Pattern(regexp="hrx-file:[A-Za-z0-9][A-Za-z0-9/_-]{0,500}") String> evidenceRefs){}
+ public record Event(@NotNull @Min(0) Integer expectedRevision,@NotNull @Pattern(regexp="SUBMIT|OPEN_RFQ|QUOTE|APPROVE|REJECT|ISSUE_PO|PROMISE|RECEIVE|IQC|CANCEL|RETURN_REQUEST|RETURN_APPROVE|RETURN_REJECT|RETURN_SHIP") String eventCode,@NotBlank @Size(min=2,max=4000) String note,@NotNull @Size(max=20) Map<String,Object> payload,@NotNull @Size(max=50) List<@NotNull @Pattern(regexp="hrx-file:[A-Za-z0-9][A-Za-z0-9/_-]{0,500}") String> evidenceRefs){}
 }

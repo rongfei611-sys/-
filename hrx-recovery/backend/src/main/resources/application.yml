@@ -6,6 +6,8 @@ spring:
     url: ${HRX_DB_URL:jdbc:postgresql://127.0.0.1:5432/hrx_recovery}
     username: ${HRX_DB_USER:hrx_recovery_app}
     password: ${HRX_DB_PASSWORD:}
+    hikari:
+      connection-init-sql: "SET TIME ZONE 'Asia/Shanghai'"
   flyway:
     enabled: ${HRX_MIGRATE:false}
     user: ${HRX_MIGRATOR_USER:hrx_recovery_migrator}
