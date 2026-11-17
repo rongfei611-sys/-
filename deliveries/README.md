@@ -1,10 +1,12 @@
 # HRX独立恢复版下载
 
-当前推荐：[Recovery 0.3源码包](HRX_RECOVERY_0_3.zip) · [SHA-256](HRX_RECOVERY_0_3.zip.sha256) · [清单](HRX_RECOVERY_0_3.manifest.json)
+当前推荐：[Recovery 0.4源码包](HRX_RECOVERY_0_4.zip) · [SHA-256](HRX_RECOVERY_0_4.zip.sha256) · [清单](HRX_RECOVERY_0_4.manifest.json)
 
-0.3新增多行采购订单、独立整单审批、需求预留与原子下单、订单专属证据。新隔离数据库上32个JUnit、14个Node测试、四组浏览器测试、构建及数据库结构/授权恢复验证通过。保留0.2拒收退货与补货闭环。
+0.4新增订单履约跟踪、项目齐套总览、风险筛选与需求跳转。新隔离数据库上36个JUnit、15个Node测试、五组浏览器测试、构建及数据库结构/授权恢复验证通过。保留0.3多行订单和0.2拒收退货与补货闭环。
 
-历史：[Recovery 0.2源码包](HRX_RECOVERY_0_2.zip) · [SHA-256](HRX_RECOVERY_0_2.zip.sha256)
+历史：[Recovery 0.3源码包](HRX_RECOVERY_0_3.zip) · [SHA-256](HRX_RECOVERY_0_3.zip.sha256)
+
+[Recovery 0.2源码包](HRX_RECOVERY_0_2.zip) · [SHA-256](HRX_RECOVERY_0_2.zip.sha256)
 
 [Recovery 0.1源码包](HRX_RECOVERY_0_1.zip) · [SHA-256](HRX_RECOVERY_0_1.zip.sha256)
 

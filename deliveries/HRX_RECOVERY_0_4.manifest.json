@@ -1,0 +1,14 @@
+{
+  "recovery_version": "0.4.0",
+  "source_commit": "fc977934c3fc7a5fa375a88192c3ab58d5481ed2",
+  "files": 83,
+  "archive_sha256": "128488f80a7720e1cee06422a4e39ad2752a156763697aa9864a031ea5955bdf",
+  "backend_tests": 36,
+  "node_tests": 15,
+  "browser_suites": 5,
+  "migration_chain": "recovery V001-V006; not original schema",
+  "new_features": "Order fulfillment and project readiness with scoped read models, returns/replacements, overlapping risks, mixed-unit row counts and demand navigation",
+  "development_direction": "Continue HRX_OS_CODEX_HANDOFF_V19_4 without waiting for missing originals",
+  "original_v19_5_restored": false,
+  "production_ready": false
+}
