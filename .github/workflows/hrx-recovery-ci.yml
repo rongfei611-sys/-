@@ -1,0 +1,81 @@
+name: HRX Recovery CI
+
+on:
+  pull_request:
+    branches:
+      - recovery/hrx-20261117
+    paths:
+      - "hrx-recovery/**"
+      - ".github/workflows/hrx-recovery-ci.yml"
+  push:
+    branches:
+      - recovery/hrx-20261117
+    paths:
+      - "hrx-recovery/**"
+      - ".github/workflows/hrx-recovery-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hrx-recovery-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Isolated verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: hrx-recovery
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.12"
+          cache: npm
+          cache-dependency-path: hrx-recovery/frontend/package-lock.json
+
+      - name: Set up Java
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: hrx-recovery/backend/pom.xml
+
+      - name: Install PostgreSQL 16 test binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          test -x /usr/lib/postgresql/16/bin/initdb
+          test -x /usr/lib/postgresql/16/bin/pg_ctl
+
+      - name: Report toolchain
+        run: |
+          node --version
+          npm --version
+          java -version
+          mvn -version
+          /usr/lib/postgresql/16/bin/postgres --version
+
+      - name: Run isolated end-to-end verification
+        env:
+          PGBIN: /usr/lib/postgresql/16/bin
+        run: bash scripts/verify-isolated.sh
+
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: hrx-recovery-verification-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            hrx-recovery/backend/target/surefire-reports/**
+            hrx-recovery/frontend/dist/**
