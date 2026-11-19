@@ -8,7 +8,7 @@
 
 对活跃分支 `recovery/hrx-20261117`：
 - Require a pull request before merging。
-- Require status check：首次CI成功后，以Actions显示的精确名称 `HRX Recovery CI / Isolated verification` 为准。
+- Require status check：首次CI成功后，以Actions显示的精确名称 `Isolated verification` 为准。
 - Require branches to be up to date。
 - Require conversation resolution。
 - Dismiss stale approvals。
