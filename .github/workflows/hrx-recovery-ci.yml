@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - recovery/hrx-20261117
+      - governance/ai-rd-team-20261119
     paths:
       - "hrx-recovery/**"
       - ".github/workflows/hrx-recovery-ci.yml"
