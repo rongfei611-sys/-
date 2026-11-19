@@ -7,7 +7,8 @@ OWNER="rongfei611-sys"
 REPO="-"
 BRANCH="recovery/hrx-20261117"
 CHECK_CONTEXT="${HRX_REQUIRED_CHECK_CONTEXT:-HRX Recovery CI / Isolated verification}"
-API="https://api.github.com/repos/${OWNER}/${REPO}/branches/${BRANCH}/protection"
+ENCODED_BRANCH="${BRANCH//\//%2F}"
+API="https://api.github.com/repos/${OWNER}/${REPO}/branches/${ENCODED_BRANCH}/protection"
 BODY="$(cat <<JSON
 {
   "required_status_checks": {
