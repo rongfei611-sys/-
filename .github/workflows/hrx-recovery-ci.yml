@@ -10,7 +10,6 @@ on:
   push:
     branches:
       - recovery/hrx-20261117
-      - governance/ai-rd-team-20261119
     paths:
       - "hrx-recovery/**"
       - ".github/workflows/hrx-recovery-ci.yml"
@@ -20,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: hrx-recovery-ci-${{ github.ref }}
+  group: hrx-recovery-ci-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
