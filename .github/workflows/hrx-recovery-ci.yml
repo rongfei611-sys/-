@@ -68,8 +68,8 @@ jobs:
           echo "HRX_CLAMSCAN=/usr/bin/clamscan" >> "$GITHUB_ENV"
           echo "HRX_SIGNATURES=$RUNNER_TEMP/hrx-test-signatures" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/hrx-test-signatures"
-          printf '44d88612fea8a8f36de82e1278abb02f:68:TEST-EICAR-ONLY\\n' > "$RUNNER_TEMP/hrx-test-signatures/eicar.hdb"
-          printf 'X5O!P%%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > "$RUNNER_TEMP/hrx-eicar.txt"
+          printf '%s\n' '44d88612fea8a8f36de82e1278abb02f:68:TEST-EICAR-ONLY' > "$RUNNER_TEMP/hrx-test-signatures/eicar.hdb"
+          printf '%s' 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > "$RUNNER_TEMP/hrx-eicar.txt"
           if /usr/bin/clamscan --database="$RUNNER_TEMP/hrx-test-signatures" "$RUNNER_TEMP/hrx-eicar.txt"; then
             echo "TEST-only ClamAV signature failed to detect the EICAR probe" >&2
             exit 1
